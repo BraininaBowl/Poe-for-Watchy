@@ -1,68 +1,93 @@
 #include <Watchy.h> //include the Watchy library
 #include "PTSerif_Bold10pt7b.h"
 #include "PTSerif_Regular10pt7b.h"
-        
+#include "raven.h"        
 
 class WatchFace : public Watchy { //inherit and extend Watchy class
   public:
-    void drawWatchFace() { //override this method to customize how the watch face looks
-      
-      int16_t  x1, y1, testx, curx, cury, lineheight, counter;
+
+    // Global vars
+    int16_t lineheight = 24;
+    int16_t curx = 68;
+    int16_t cury = 12 + lineheight;
+
+    // Text drawing
+    void drawText(String text){
+      int16_t  x1, y1, testx, counter;
       uint16_t w, h;
-      String mins[] = {"zero", "one", "two", "three", "four", "five", 
-      String pretext[] = {"Once", "upon", "a"};
-      String text[] = {"midnight"};
-      String posttext[] = {"dreary,", "while", "I", "pondered,", "weak", "and", "weary,", "over", "many", "a", "quaint", "and", "curious", "volume", "of", "forgotten", "lore."};
-      int16_t arraylength[] = {3,1,17};
+
+      display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
+      testx = curx + w;
+      if (testx > 194){
+        cury += lineheight; 
+        if (cury < 64) {
+          curx = 68;
+        } else {
+          curx = 6;
+        }
+      }
+      display.setCursor(curx,cury);
+      curx += w + 5;
+      display.print(text);
+    }
+  
+    void drawWatchFace() { //override this method to customize how the watch face looks
+
+      int16_t hoffset;
+      int16_t arraylength[] = {3,0,27};
+      String nmbrs[] = {"midnight", "one", "two", "three", "four", "five", "six", "seven", "eight","nine","ten","eleven","twelve","thirteen","fourteen","quarter","sixteen","seventeen","eighteen","nineteen","twenty","twenty-one","twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "half" };
+      String pretext[] = {"nce", "upon", "a"};
+      String text[10] = {};
+      if (currentTime.Hour == 12 && currentTime.Minute == 0){
+        text[arraylength[1]] = "noon";
+        arraylength[1] += 1; 
+      } else {
+        if (currentTime.Minute == 0){
+        } else if (currentTime.Minute < 31) {
+          text[arraylength[1]] = nmbrs[currentTime.Minute];
+          arraylength[1] += 1; 
+          text[arraylength[1]] = "past";
+          arraylength[1] += 1;
+          hoffset = currentTime.Hour;
+        } else {
+          text[arraylength[1]] = nmbrs[60-currentTime.Minute];
+          arraylength[1] += 1; 
+          text[arraylength[1]] = "to";
+          arraylength[1] += 1;           
+          hoffset = currentTime.Hour + 1;
+        }
+        if (hoffset < 13){
+          text[arraylength[1]] = nmbrs[hoffset];
+          arraylength[1] += 1; 
+        } else {
+          text[arraylength[1]] = nmbrs[hoffset-12];
+          arraylength[1] += 1; 
+        }
+      }
+      
+      String posttext[] = {"dreary,", "while", "I", "pondered,", "weak", "and", "weary,", "over", "many", "a", "quaint", "and", "curious", "volume", "of", "forgotten", "lore.", "While", "I", "nodded,", "nearly", "napping,", "suddenly", "there", "came", "a", "tapping"};
       
       //drawbg
       display.fillScreen(GxEPD_WHITE);
+      display.drawBitmap(4, 4, Raven, 60, 60, GxEPD_BLACK);
 
       //draw time
       display.setTextColor(GxEPD_BLACK);
       display.setTextWrap(false);
 
-      lineheight = 24;
-      curx = 6;
-      cury = 6 + lineheight;
-
       display.setFont(&PTSerif_Regular10pt7b);
       for (int i=0; i<arraylength[0]; i++) {
-        display.getTextBounds(pretext[i], 0, 0, &x1, &y1, &w, &h);
-        testx = curx + w;
-        if (testx > 194){
-          curx = 6;
-          cury += lineheight; 
-        }
-        display.setCursor(curx,cury);
-        curx += w + 5;
-        display.print(pretext[i]);
+        drawText(pretext[i]);
       }
 
       display.setFont(&PTSerif_Bold10pt7b);
       for (int i=0; i<arraylength[1]; i++) {
-        display.getTextBounds(text[i], 0, 0, &x1, &y1, &w, &h);
-        testx = curx + w;
-        if (testx > 194){
-          curx = 6;
-          cury += lineheight; 
-        }
-        display.setCursor(curx,cury);
-        curx += w + 5;
-        display.print(text[i]);
+        drawText(text[i]);
       }
 
       display.setFont(&PTSerif_Regular10pt7b);
       for (int i=0; i<arraylength[2]; i++) {
-        display.getTextBounds(posttext[i], 0, 0, &x1, &y1, &w, &h);
-        testx = curx + w;
-        if (testx > 194){
-          curx = 6;
-          cury += lineheight; 
-        }
-        display.setCursor(curx,cury);
-        curx += w + 5;
-        display.print(posttext[i]);
+        drawText(posttext[i]);
       }
 
     
