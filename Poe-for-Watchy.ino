@@ -58,8 +58,8 @@ class WatchFace : public Watchy { //inherit and extend Watchy class
         }
         if (hoffset < 13){
           text[arraylength[1]] = nmbrs[hoffset];
-          arraylength[1] += 1; 
-        } else if (currentTime.Hour == 13) {
+          arraylength[1] += 1;       
+        } else if (hoffset == 13) {  
           text[arraylength[1]] = "one";
           arraylength[1] += 1; 
         } else {
